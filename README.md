@@ -68,3 +68,5 @@ MIT License
 ## 作者
 
 罗霖 <luolin_0926@icloud.com>
+
+这是一个为帮助学生准备大学英语四级考试（CET-4）而创建的教育项目。
