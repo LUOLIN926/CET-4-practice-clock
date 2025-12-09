@@ -67,4 +67,4 @@ MIT License
 
 ## 作者
 
-Created for educational purposes.
+罗霖 <luolin_0926@icloud.com>
