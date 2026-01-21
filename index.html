@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CET-4/CET-6考试时间模拟器beta</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="column-wrapper">
+      <!-- 左侧栏 -->
+      <div class="left-column">
+        <div class="header-wrapper">
+          <span class="close-btn" id="closeHeaderBtn" title="关闭考试信息">×</span>
+          <div class="exam-time-header" id="examTimeHeader">
+            <span id="examType">CET-4</span> 考试时间 <span id="examDate">2025年12月13日上午</span> <span id="examTimeRange">9:00
+              - 11:20</span>
+            <div class="exam-countdown" id="examCountdown">距离考试还有 X 天</div>
+          </div>
+        </div>
+
+        <h1 id="pageHeader">🎓<span id="examTitle">CET-4</span><br>考试时间模拟器</h1>
+
+        <div class="real-time-display">
+          模拟考场时间：<span id="currentTimeSpan">09:00:00</span>
+        </div>
+
+        <div class="timer-display">
+          距离考试结束：<span id="timer">02:20:00</span>
+        </div>
+
+        <div class="section-timer-display" id="sectionTimer" style="display: none;">
+          本环节倒计时：<span class="time-value">00:00:00</span>
+        </div>
+
+        <div class="current-section" id="currentSection">
+          考试尚未开始，请点击开始按钮
+        </div>
+
+        <div class="countdown-container">
+          <div class="countdown" id="countdown">
+            <span class="countdown-label">下一环节：</span><span class="countdown-value">--</span>
+          </div>
+          <button onclick="nextSection()" id="nextBtn" class="next-button">→</button>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="controls">
+          <button onclick="startExam()" id="startBtn">开始考试</button>
+          <button onclick="pauseExam()" id="pauseBtn" disabled>暂停</button>
+          <button onclick="resetExam()" id="resetBtn">重置</button>
+          <div class="skip-selector">
+            <label for="sectionSelect">跳转到环节:</label>
+            <select id="sectionSelect">
+              <!-- 选项将由JavaScript动态生成 -->
+            </select>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <div class="stat-number" id="totalTime">140</div>
+            <div class="stat-label">总分钟</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="remainingTime">140</div>
+            <div class="stat-label">剩余分钟</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="completedSections">0</div>
+            <div class="stat-label">已完成</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧栏 -->
+      <div class="right-column">
+        <div class="section-timeline" id="timeline">
+          <!-- Sections will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- 预设选择器横跨两栏 -->
+      <div class="preset-selector-full-width">
+        <div class="custom-preset-selector">
+          <div class="preset-selector-header">
+            <div class="preset-selector-label">选择考试预设:</div>
+            <div class="preset-type-buttons">
+              <button type="button" class="preset-type-btn active" data-type="official" id="officialPresetBtn">官方预设</button>
+              <button type="button" class="preset-type-btn" data-type="custom" id="customPresetBtn">自定义预设</button>
+            </div>
+          </div>
+          <div class="preset-selector-dropdown" id="presetSelector">
+            <div class="preset-selector-selected" id="selectedPreset">
+              <span>CET-4 (大学英语四级)</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="preset-selector-options" id="presetOptions" style="display: none;">
+              <div class="preset-option-group" id="officialPresetGroup">
+                <div class="option-group-title">官方预设</div>
+                <div class="preset-option" data-value="cet4">CET-4 (大学英语四级)</div>
+                <div class="preset-option" data-value="cet6">CET-6 (大学英语六级)</div>
+              </div>
+              <div class="preset-option-group" id="customPresetGroup" style="display: none;">
+                <div class="option-group-title">自定义预设</div>
+                <div id="customPresetOptions">
+                  <!-- 自定义考试选项将由JavaScript动态生成 -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自定义考试按钮 -->
+      <div class="toggle-exam-button-container">
+        <button id="customExamBtn" onclick="goToCustomExam()" class="toggle-exam-button" style="background-color: #e67e22;">自定义考试设置</button>
+      </div>
+      
+      <!-- 直接显示的显示设置控件 -->
+      <div class="inline-display-settings">
+        <div class="inline-setting-controls">
+          <span class="display-settings-label">显示设置：</span>
+          <label class="setting-checkbox-horizontal">
+            <input type="checkbox" id="inlineShowCurrentTime" name="inlineShowCurrentTime" checked onchange="toggleDisplaySetting('showCurrentTime', this.checked)">
+            <span>显示"模拟考场时间"</span>
+          </label>
+          <label class="setting-checkbox-horizontal">
+            <input type="checkbox" id="inlineShowCountdownTimer" name="inlineShowCountdownTimer" checked onchange="toggleDisplaySetting('showCountdownTimer', this.checked)">
+            <span>显示"距离考试结束"</span>
+          </label>
+          <label class="setting-checkbox-horizontal">
+            <input type="checkbox" id="inlineShowSectionTimer" name="inlineShowSectionTimer" checked onchange="toggleDisplaySetting('showSectionTimer', this.checked)">
+            <span>显示"本环节倒计时"</span>
+          </label>
+          <button type="button" id="resetDisplaySettingsBtn" class="reset-display-settings-btn" title="恢复默认显示设置" onclick="resetDisplaySettings()">恢复预设默认显示设置</button>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- 恢复提示（小屏幕设备使用） -->
+    <div class="restore-hint" id="restoreHintSmallScreen" style="display: none;">
+      点击恢复倒数日期
+    </div>
+  </div>
+
+  <!-- 底部区域：功能介绍、恢复提示和备案信息 -->
+  <div class="bottom-bar">
+    <div class="bottom-content">
+      <div class="footer-text" id="showIntroBtnBottom" onclick="showIntroduction()">点击显示功能介绍</div>
+      <div class="footer-text restore-hint" id="restoreHintLargeScreen" style="display: none; margin-top: 10px;">
+        点击恢复倒数日期
+      </div>
+      <div class="icp-info">
+        <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备2026000755号</a>
+        | 
+        <img src="ga_icon.png" alt="公安备案图标" style="vertical-align: middle; width: 16px; height: 16px;" />
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44030002009821" rel="noreferrer" target="_blank">粤公网安备44030002009821号</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showIntroduction() {
+      window.open('introduction.html', '_blank');
+    }
+    
+    // 跳转到自定义考试配置页面
+    function goToCustomExam() {
+      window.location.href = 'custom-exam.html';
+    }
+    
+    // 处理考试预设选择变化
+    function handlePresetChange(value) {
+      if (value === 'cet4' || value === 'cet6') {
+        // 官方预设
+        currentExamType = value;
+        updateExamConfig(officialExams[value]);
+        
+        // 更新显示的预设名称
+        const presetName = value === 'cet4' ? 'CET-4 (大学英语四级)' : 'CET-6 (大学英语六级)';
+        document.getElementById('selectedPreset').innerHTML = `<span>${presetName}</span><span class="dropdown-arrow">▼</span>`;
+        // 移除自定义选中样式
+        document.getElementById('selectedPreset').classList.remove('custom-selected');
+      } else {
+        // 自定义预设
+        selectCustomExam(value);
+        
+        // 更新显示的预设名称
+        document.getElementById('selectedPreset').innerHTML = `<span>${value}</span><span class="dropdown-arrow">▼</span>`;
+        // 添加自定义选中样式
+        document.getElementById('selectedPreset').classList.add('custom-selected');
+      }
+      
+      // 隐藏下拉菜单
+      document.getElementById('presetOptions').style.display = 'none';
+    }
+    
+    // 动态填充自定义考试选项
+    function populateCustomPresets() {
+      const customPresetOptions = document.getElementById('customPresetOptions');
+      // 清空现有选项
+      customPresetOptions.innerHTML = '';
+      
+      if (customExams && customExams.length > 0) {
+        customExams.forEach(exam => {
+          const option = document.createElement('div');
+          option.className = 'preset-option';
+          option.textContent = exam.name;
+          option.setAttribute('data-value', exam.name);
+          // 在这里添加点击事件监听器
+          option.addEventListener('click', function() {
+            handlePresetChange(this.getAttribute('data-value'));
+          });
+          customPresetOptions.appendChild(option);
+        });
+      } else {
+        const option = document.createElement('div');
+        option.className = 'preset-option disabled';
+        option.textContent = '无自定义考试';
+        option.style.color = '#aaa';
+        customPresetOptions.appendChild(option);
+      }
+    }
+    
+    // 在DOM加载完成后设置自定义选择器事件
+    document.addEventListener('DOMContentLoaded', function() {
+      // 为自定义选择器添加点击事件
+      const selector = document.getElementById('presetSelector');
+      const selected = document.getElementById('selectedPreset');
+      const options = document.getElementById('presetOptions');
+      
+      selected.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isDisplayed = options.style.display !== 'none';
+        options.style.display = isDisplayed ? 'none' : 'block';
+      });
+      
+      // 使用事件委托为所有预设选项添加点击事件
+      options.addEventListener('click', function(e) {
+        if (e.target.classList.contains('preset-option') && !e.target.classList.contains('disabled')) {
+          const value = e.target.getAttribute('data-value');
+          handlePresetChange(value);
+        }
+      });
+      
+      // 点击页面其他地方关闭下拉菜单
+      document.addEventListener('click', function(e) {
+        if (!selector.contains(e.target)) {
+          options.style.display = 'none';
+        }
+      });
+      
+      // 预设类型切换按钮事件
+      const officialBtn = document.getElementById('officialPresetBtn');
+      const customBtn = document.getElementById('customPresetBtn');
+      const officialGroup = document.getElementById('officialPresetGroup');
+      const customGroup = document.getElementById('customPresetGroup');
+      
+      officialBtn.addEventListener('click', function() {
+        officialBtn.classList.add('active');
+        customBtn.classList.remove('active');
+        officialGroup.style.display = 'block';
+        customGroup.style.display = 'none';
+        // 如果当前选中的是自定义预设，切换到第一个官方预设
+        const selectedValue = selected.querySelector('span').textContent;
+        if (selectedValue && !selectedValue.includes('CET-')) {
+          handlePresetChange('cet4');
+        }
+      });
+      
+      customBtn.addEventListener('click', function() {
+        customBtn.classList.add('active');
+        officialBtn.classList.remove('active');
+        officialGroup.style.display = 'none';
+        customGroup.style.display = 'block';
+        populateCustomPresets();
+      });
+      
+      populateCustomPresets();
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+
+</html>
